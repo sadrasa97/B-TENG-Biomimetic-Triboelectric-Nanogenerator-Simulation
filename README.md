@@ -19,11 +19,11 @@ This project provides a MATLAB-based simulation of the **B-TENG (Biomimetic Trib
 
 ## Equations Implemented
 ### **Energy Harvesting Calculations**
-1. Volume Flow Rate: \( Q_v = v \times S \)
-2. Mass Flow Rate: \( Q_m = Q_v \times \rho \)
-3. Instantaneous Output Power: \( P_o = \frac{V^2}{R} \)
-4. Instantaneous Input Power: \( P_i = \frac{Q_m \times v^2}{2} \)
-5. Conversion Efficiency: \( \eta = \frac{P_o}{P_i} \times 100 \%
+1. Volume Flow Rate
+2. Mass Flow Rate
+3. Instantaneous Output Power
+4. Instantaneous Input Power
+5. Conversion Efficiency
 
 ### **Fluid–Structure Interaction & Film Dynamics**
 - Governing equations model **geometrically nonlinear deformation** of the flapping film.
@@ -41,7 +41,7 @@ This project provides a MATLAB-based simulation of the **B-TENG (Biomimetic Trib
 1. Clone the repository:
    ```sh
    git clone https://github.com/yourusername/bteng-simulation.git
-   cd bteng-simulation
+   cd BTENG.m
    ```
 2. Open MATLAB and navigate to the project folder.
 3. Run the main script:
