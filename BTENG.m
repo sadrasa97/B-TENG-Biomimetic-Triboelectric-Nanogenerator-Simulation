@@ -1,7 +1,7 @@
 %% Simulation of B-TENG (Biomimetic Triboelectric Nanogenerator)
 % It includes:
-%   1. Energy harvesting calculations (Equations 7–11)
-%   2. Fluid–structure interaction and nonlinear film dynamics (Equations 1–6)
+%   1. Energy harvesting calculations (Equations 7â€“11)
+%   2. Fluidâ€“structure interaction and nonlinear film dynamics (Equations 1â€“6)
 %   3. Electrical output simulation vs. wind velocity and load resistance.
 %
 % Additionally, it generates MATLAB-based figures that simulate:
@@ -12,15 +12,16 @@
 
 clear; clc; close all;
 warning('off', 'all');
+
 %% ------------------------------------------------------------------------
-%% Section 1: Energy Harvesting Calculations (Equations 7–11)
+%% Section 1: Energy Harvesting Calculations (Equations 7â€“11)
 %% ------------------------------------------------------------------------
 % Equations:
 %   (7) Q_v = v * S         --> Volume flow rate
 %   (8) Q_m = Q_v * rho     --> Mass flow rate
 %   (9) P_o = V^2 / R       --> Instantaneous output power
 %  (10) P_i = (Q_m * v^2)/2  --> Instantaneous input power
-%  (11) ? = (P_o / P_i)*100  --> Conversion efficiency
+%  (11) eta = (P_o / P_i)*100  --> Conversion efficiency
 
 % Constants
 v_fixed = 8;          % Wind velocity in m/s (nominal value)
@@ -51,13 +52,13 @@ eta_fixed = (P_o / P_i) * 100;
 fprintf('Equation 11 - Conversion Efficiency: %.2f%%\n\n', eta_fixed);
 
 %% ------------------------------------------------------------------------
-%% Section 2: Fluid–Structure Interaction & Film Dynamics (Equations 1–6)
+%% Section 2: Fluidâ€“Structure Interaction & Film Dynamics (Equations 1â€“6)
 %% ------------------------------------------------------------------------
 % The film (or flexible PVDF) is modeled with a geometrically nonlinear equation.
 % Equations:
-%   (3) rs*(d^2X/dt^2) - d/ds(T*dX/ds) + Kb*(d^4X/ds^4) = F
-%   (4) T(s) = Ks*(|dX/ds| - 1)
-%   (6) Nondimensional parameters: M = rs/(rho_f*L), Ks^, Kb^
+%   (3) rho_s*(d^2X/dt^2) - d/ds(T*dX/ds) + Kb*(d^4X/ds^4) = F
+%   (4) T(s) = K_s*(|dX/ds| - 1)
+%   (6) Nondimensional parameters: M = rho_s/(rho_f*L), K_s_dimless, K_b_dimless
 
 % Filament and fluid properties
 rho_s = 1.2;        % Linear density (kg/m)
@@ -106,27 +107,41 @@ f_density = -integral(@(s_val) interp1(s, F, s_val) .* delta_smooth(s_val - s_ce
 fprintf('Equation 5 - Force density: %.4f N/m\n\n', f_density);
 
 %% ------------------------------------------------------------------------
-%% Section 3: Fluid Dynamics (Equations 1–2)
+%% Section 3: Fluid Dynamics (Equations 1â€“2)
 %% ------------------------------------------------------------------------
 % Using a simplified 1D form for demonstration:
-%   Equation 1: ? (?u/?t + u·?u) = -?p + ??^2u + f_ext
-%   Equation 2: ?·u = 0
+%   Equation 1: rho*(du/dt + uÂ·du/ds) = -dp/ds + mu*d^2u/ds^2 + f_ext
+%   Equation 2: du/ds = 0
+%
+% Here, we create spatially varying profiles from the constant scalar values.
 
+% Define the spatial grid (reuse s from earlier)
+% Convert scalar u and p to vectors defined along s.
 u = 1;              % fluid velocity (m/s)
 p = 101325;         % Atmospheric pressure (Pa)
-mu = 1.81e-5;       % Dynamic viscosity (Pa·s)
+mu = 1.81e-5;       % Dynamic viscosity (PaÂ·s)
 f_external = 0;     % No external force
 
-du_dt = -gradient(p, s) + mu * gradient(gradient(u, s), s) + f_external;
+u_vec = u * ones(size(s));
+p_vec = p * ones(size(s));
+
+% Compute spatial derivatives
+dp_ds = gradient(p_vec, s);
+du_ds = gradient(u_vec, s);
+d2u_ds2 = gradient(du_ds, s);
+
+% Compute fluid acceleration (ignoring convective term for simplicity)
+du_dt = -dp_ds + mu * d2u_ds2 + f_external;
 fprintf('Equation 1 - Average fluid acceleration: %.4f m/s^2\n', mean(du_dt));
 
-div_u = gradient(u, s);
+% Equation 2: Velocity divergence
+div_u = du_ds;
 fprintf('Equation 2 - Average velocity divergence: %.4f 1/s\n\n', mean(div_u));
 
 %% ------------------------------------------------------------------------
 %% Section 4: Simulation of Electrical Output vs. Wind Velocity & Load
 %% ------------------------------------------------------------------------
-% The electrical output is influenced by the contact–propagation–separation
+% The electrical output is influenced by the contactâ€“propagationâ€“separation
 % cycle of the films. We assume a piecewise linear behavior:
 %   For wind speeds from 4 to 8 m/s, voltage and current increase;
 %   Above 8 m/s, they decrease.
@@ -136,7 +151,7 @@ fprintf('Equation 2 - Average velocity divergence: %.4f 1/s\n\n', mean(div_u));
 %   - Output current I (mA)
 %   - Output power P_o (W) [Equation 9]
 %   - Input power P_i (W) [Equation 10]
-%   - Conversion efficiency ? (%) [Equation 11]
+%   - Conversion efficiency eta (%) [Equation 11]
 
 v_array = linspace(4, 15, 100);  % Wind velocity range (m/s)
 f_array = 5 + 2 * v_array;        % Example motion frequency (Hz)
@@ -259,7 +274,7 @@ title('FFT Spectrum of Flapping Signal (Simulated)'); grid on;
 %% Section 6: MATLAB Simulation of the B-TENG Working Principle
 % (Electric Potential Distribution vs. Contact Area Variation)
 %% ------------------------------------------------------------------------
-% According to the article, the B-TENG output is generated by the contact–propagation–separation
+% According to the article, the B-TENG output is generated by the contactâ€“propagationâ€“separation
 % cycle. The maximum contact area occurs at d/L = 0.25 and primary contact at about 1/3 of the film.
 %
 % In this simulation:
@@ -313,7 +328,7 @@ view(45,30);
 %% Section 7: Additional Simulated Figures from the Article
 %% ------------------------------------------------------------------------
 % --- Figure 9: Simulated Flapping of Two Interacting Films (Out-of-Phase) ---
-% We simulate two film trajectories that are 180° out-of-phase.
+% We simulate two film trajectories that are 180Â° out-of-phase.
 t = linspace(0, 2*pi, 200);
 film1 = 0.1 * sin(t);
 film2 = 0.1 * sin(t + pi);  % Out-of-phase motion
